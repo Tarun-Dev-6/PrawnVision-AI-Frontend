@@ -1,69 +1,48 @@
-import { useState } from "react";
-import { Search, Filter, Calendar } from "lucide-react";
+import { Clock, ImageIcon } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { BatchCard, Batch } from "@/components/common/BatchCard";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 // Mock data - replace with API calls
-const mockHistory: Batch[] = [
+interface CaptureRecord {
+  id: string;
+  imageUrl: string;
+  count: number;
+  capturedAt: string;
+}
+
+const mockCaptures: CaptureRecord[] = [
   {
     id: "1",
-    name: "Pond A - Batch 001",
-    createdAt: "2024-01-15",
-    totalCount: 125000,
-    imageCount: 15,
-    status: "active",
+    imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400&h=300&fit=crop",
+    count: 2456,
+    capturedAt: "2024-01-15 14:30",
   },
   {
     id: "2",
-    name: "Pond B - Batch 002",
-    createdAt: "2024-01-14",
-    totalCount: 98500,
-    imageCount: 12,
-    status: "completed",
+    imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400&h=300&fit=crop",
+    count: 1823,
+    capturedAt: "2024-01-15 10:15",
   },
   {
     id: "3",
-    name: "Pond C - Batch 003",
-    createdAt: "2024-01-13",
-    totalCount: 0,
-    imageCount: 0,
-    status: "pending",
+    imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400&h=300&fit=crop",
+    count: 3102,
+    capturedAt: "2024-01-14 16:45",
   },
   {
     id: "4",
-    name: "Pond A - Batch 004",
-    createdAt: "2024-01-12",
-    totalCount: 150000,
-    imageCount: 18,
-    status: "completed",
+    imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400&h=300&fit=crop",
+    count: 987,
+    capturedAt: "2024-01-14 09:20",
   },
   {
     id: "5",
-    name: "Pond D - Batch 005",
-    createdAt: "2024-01-11",
-    totalCount: 87500,
-    imageCount: 10,
-    status: "completed",
+    imageUrl: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=400&h=300&fit=crop",
+    count: 4521,
+    capturedAt: "2024-01-13 11:00",
   },
 ];
 
 export const HistoryPage = () => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-
-  const filteredBatches = mockHistory.filter((batch) => {
-    const matchesSearch = batch.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      filterStatus === "all" || batch.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
   return (
     <AppLayout>
       <div className="px-5 pt-6 safe-area-inset-top">
@@ -71,73 +50,51 @@ export const HistoryPage = () => {
         <div className="mb-6 animate-slide-down">
           <h1 className="text-2xl font-bold text-foreground mb-1">History</h1>
           <p className="text-muted-foreground text-sm">
-            View and manage your batch history
+            Your capture history
           </p>
         </div>
 
-        {/* Search & Filter */}
-        <div className="flex gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search batches..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11"
-            />
-          </div>
-          <Button variant="outline" size="icon" className="shrink-0">
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Filter Pills */}
-        <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
-          {["all", "active", "completed", "pending"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                filterStatus === status
-                  ? "ocean-gradient text-primary-foreground shadow-soft"
-                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Results Count */}
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">
-            {filteredBatches.length} batch{filteredBatches.length !== 1 && "es"} found
-          </p>
-          <button className="flex items-center gap-1.5 text-sm text-primary font-medium">
-            <Calendar className="h-4 w-4" />
-            Date Range
-          </button>
-        </div>
-
-        {/* Batch List */}
+        {/* Capture List */}
         <div className="space-y-4">
-          {filteredBatches.length > 0 ? (
-            filteredBatches.map((batch, index) => (
-              <BatchCard
-                key={batch.id}
-                batch={batch}
-                onClick={() => navigate(`/batch/${batch.id}`)}
+          {mockCaptures.length > 0 ? (
+            mockCaptures.map((capture, index) => (
+              <div
+                key={capture.id}
+                className="bg-card rounded-2xl shadow-soft overflow-hidden animate-scale-in"
                 style={{ animationDelay: `${index * 50}ms` }}
-              />
+              >
+                {/* Image */}
+                <div className="relative h-40 bg-secondary">
+                  <img
+                    src={capture.imageUrl}
+                    alt={`Capture ${capture.id}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
+                    {capture.count.toLocaleString()} seeds
+                  </div>
+                </div>
+                
+                {/* Info */}
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span className="text-sm">{capture.capturedAt}</span>
+                  </div>
+                  <div className="text-lg font-bold text-foreground">
+                    {capture.count.toLocaleString()}
+                  </div>
+                </div>
+              </div>
             ))
           ) : (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-muted-foreground">No batches found</p>
+              <p className="text-muted-foreground">No captures yet</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Try adjusting your search or filters
+                Start capturing to see your history
               </p>
             </div>
           )}

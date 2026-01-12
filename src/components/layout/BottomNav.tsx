@@ -1,12 +1,10 @@
-import { Home, Camera, History, FileText, User } from "lucide-react";
+import { Camera, History, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/dashboard" },
   { icon: History, label: "History", path: "/history" },
   { icon: Camera, label: "Capture", path: "/capture", isMain: true },
-  { icon: FileText, label: "Reports", path: "/reports" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
 
