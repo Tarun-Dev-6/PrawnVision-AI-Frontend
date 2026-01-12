@@ -7,7 +7,7 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
         "2xl": "1400px",
       },
@@ -57,33 +57,87 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom aquaculture colors
+        ocean: {
+          50: "hsl(200 40% 96%)",
+          100: "hsl(200 35% 92%)",
+          200: "hsl(200 30% 85%)",
+          300: "hsl(200 40% 70%)",
+          400: "hsl(200 60% 55%)",
+          500: "hsl(200 80% 35%)",
+          600: "hsl(200 85% 28%)",
+          700: "hsl(200 90% 22%)",
+          800: "hsl(200 90% 16%)",
+          900: "hsl(200 90% 10%)",
+        },
+        teal: {
+          50: "hsl(175 40% 96%)",
+          100: "hsl(175 35% 90%)",
+          200: "hsl(175 40% 80%)",
+          300: "hsl(175 50% 65%)",
+          400: "hsl(175 60% 52%)",
+          500: "hsl(175 65% 45%)",
+          600: "hsl(175 70% 38%)",
+          700: "hsl(175 75% 30%)",
+          800: "hsl(175 80% 22%)",
+          900: "hsl(175 85% 15%)",
+        },
+        coral: {
+          50: "hsl(10 90% 97%)",
+          100: "hsl(10 85% 93%)",
+          200: "hsl(10 80% 85%)",
+          300: "hsl(10 80% 72%)",
+          400: "hsl(10 82% 62%)",
+          500: "hsl(10 85% 55%)",
+          600: "hsl(10 85% 48%)",
+          700: "hsl(10 85% 40%)",
+          800: "hsl(10 85% 32%)",
+          900: "hsl(10 85% 24%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "calc(var(--radius) + 16px)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "slide-up": {
+          from: { transform: "translateY(16px)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+        "slide-down": {
+          from: { transform: "translateY(-16px)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "scale-in": {
+          from: { transform: "scale(0.95)", opacity: "0" },
+          to: { transform: "scale(1)", opacity: "1" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
+        "slide-down": "slide-down 0.4s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "scale-in": "scale-in 0.3s ease-out",
       },
     },
   },
