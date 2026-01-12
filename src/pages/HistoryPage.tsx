@@ -45,14 +45,7 @@ const mockCaptures: CaptureRecord[] = [
 export const HistoryPage = () => {
   return (
     <AppLayout>
-      <div className="px-5 pt-6 safe-area-inset-top">
-        {/* Header */}
-        <div className="mb-6 animate-slide-down">
-          <h1 className="text-2xl font-bold text-foreground mb-1">History</h1>
-          <p className="text-muted-foreground text-sm">
-            Your capture history
-          </p>
-        </div>
+      <div className="px-5 pt-6">
 
         {/* Capture List */}
         <div className="space-y-4">
