@@ -117,9 +117,9 @@ export const CapturePage = () => {
   const saveResult = () => {
     toast({
       title: "Saved!",
-      description: `Count of ${result?.count.toLocaleString()} saved to batch.`,
+      description: `Count of ${result?.count.toLocaleString()} saved successfully.`,
     });
-    navigate("/dashboard");
+    navigate("/history");
   };
 
   // Start camera on mount

@@ -6,10 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
-import DashboardPage from "./pages/DashboardPage";
 import CapturePage from "./pages/CapturePage";
 import HistoryPage from "./pages/HistoryPage";
-import ReportsPage from "./pages/ReportsPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
@@ -40,14 +38,6 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/capture"
         element={
           <ProtectedRoute>
@@ -60,14 +50,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <HistoryPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <ReportsPage />
           </ProtectedRoute>
         }
       />

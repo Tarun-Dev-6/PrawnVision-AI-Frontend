@@ -36,7 +36,7 @@ export const AuthPage = () => {
           description: "Welcome to PrawnVision AI.",
         });
       }
-      navigate("/dashboard");
+      navigate("/capture");
     } catch (error) {
       toast({
         title: "Error",

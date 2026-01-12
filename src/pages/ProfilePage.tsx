@@ -1,26 +1,18 @@
 import {
   User,
   Mail,
-  Bell,
-  Shield,
-  HelpCircle,
+  Phone,
+  MapPin,
+  Calendar,
   LogOut,
-  ChevronRight,
-  Moon,
   Camera,
+  Building,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-
-const menuItems = [
-  { icon: User, label: "Edit Profile", path: "/profile/edit" },
-  { icon: Bell, label: "Notifications", path: "/profile/notifications" },
-  { icon: Shield, label: "Privacy & Security", path: "/profile/privacy" },
-  { icon: HelpCircle, label: "Help & Support", path: "/profile/help" },
-];
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -36,73 +28,99 @@ export const ProfilePage = () => {
     navigate("/");
   };
 
+  // Mock user details - replace with actual user data from API
+  const userDetails = {
+    name: user?.name || "John Doe",
+    email: user?.email || "john@example.com",
+    phone: "+1 234 567 8900",
+    company: "Aqua Farms Ltd.",
+    location: "Chennai, India",
+    joinedDate: "January 2024",
+  };
+
   return (
     <AppLayout>
       <div className="px-5 pt-6 safe-area-inset-top">
         {/* Header */}
         <div className="text-center mb-8 animate-slide-down">
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <div className="w-24 h-24 ocean-gradient rounded-full flex items-center justify-center">
-              <User className="h-12 w-12 text-primary-foreground" />
+          <div className="relative w-28 h-28 mx-auto mb-4">
+            <div className="w-28 h-28 ocean-gradient rounded-full flex items-center justify-center shadow-elevated">
+              <User className="h-14 w-14 text-primary-foreground" />
             </div>
-            <button className="absolute bottom-0 right-0 w-8 h-8 bg-accent rounded-full flex items-center justify-center shadow-soft">
+            <button className="absolute bottom-0 right-0 w-9 h-9 bg-accent rounded-full flex items-center justify-center shadow-soft border-2 border-background">
               <Camera className="h-4 w-4 text-accent-foreground" />
             </button>
           </div>
-          <h1 className="text-xl font-bold text-foreground">
-            {user?.name || "User"}
+          <h1 className="text-2xl font-bold text-foreground">
+            {userDetails.name}
           </h1>
-          <p className="text-muted-foreground text-sm">{user?.email}</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            {userDetails.company}
+          </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="bg-card rounded-2xl p-4 text-center shadow-soft">
-            <p className="text-2xl font-bold text-foreground">27</p>
-            <p className="text-xs text-muted-foreground mt-1">Batches</p>
-          </div>
-          <div className="bg-card rounded-2xl p-4 text-center shadow-soft">
-            <p className="text-2xl font-bold text-foreground">156</p>
-            <p className="text-xs text-muted-foreground mt-1">Scans</p>
-          </div>
-          <div className="bg-card rounded-2xl p-4 text-center shadow-soft">
-            <p className="text-2xl font-bold text-foreground">98%</p>
-            <p className="text-xs text-muted-foreground mt-1">Accuracy</p>
-          </div>
-        </div>
-
-        {/* Menu Items */}
+        {/* User Details Card */}
         <div className="bg-card rounded-2xl shadow-soft overflow-hidden mb-6 animate-scale-in">
-          {menuItems.map((item, index) => (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-secondary/50 transition-colors text-left"
-            >
+          <div className="p-5 border-b border-border">
+            <h2 className="text-lg font-semibold text-foreground">Profile Details</h2>
+          </div>
+          
+          <div className="divide-y divide-border">
+            {/* Email */}
+            <div className="flex items-center gap-4 px-5 py-4">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                <item.icon className="h-5 w-5 text-primary" />
+                <Mail className="h-5 w-5 text-primary" />
               </div>
-              <span className="flex-1 font-medium text-foreground">
-                {item.label}
-              </span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </button>
-          ))}
-        </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium text-foreground">{userDetails.email}</p>
+              </div>
+            </div>
 
-        {/* App Settings */}
-        <div className="bg-card rounded-2xl shadow-soft overflow-hidden mb-6 animate-scale-in">
-          <button className="w-full flex items-center gap-4 px-5 py-4 hover:bg-secondary/50 transition-colors text-left">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Moon className="h-5 w-5 text-primary" />
+            {/* Phone */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p className="font-medium text-foreground">{userDetails.phone}</p>
+              </div>
             </div>
-            <span className="flex-1 font-medium text-foreground">
-              Dark Mode
-            </span>
-            <div className="w-12 h-7 bg-secondary rounded-full p-1">
-              <div className="w-5 h-5 bg-card rounded-full shadow-sm" />
+
+            {/* Company */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <Building className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Company</p>
+                <p className="font-medium text-foreground">{userDetails.company}</p>
+              </div>
             </div>
-          </button>
+
+            {/* Location */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <MapPin className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Location</p>
+                <p className="font-medium text-foreground">{userDetails.location}</p>
+              </div>
+            </div>
+
+            {/* Joined Date */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Member Since</p>
+                <p className="font-medium text-foreground">{userDetails.joinedDate}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Logout */}
