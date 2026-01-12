@@ -40,8 +40,8 @@ export const ProfilePage = () => {
 
   return (
     <AppLayout>
-      <div className="px-5 pt-6 safe-area-inset-top">
-        {/* Header */}
+      <div className="px-5 pt-6">
+        {/* Profile Avatar */}
         <div className="text-center mb-8 animate-slide-down">
           <div className="relative w-28 h-28 mx-auto mb-4">
             <div className="w-28 h-28 ocean-gradient rounded-full flex items-center justify-center shadow-elevated">
