@@ -4,6 +4,7 @@ import { Camera, Zap, RotateCcw, Image as ImageIcon, Check, Focus } from "lucide
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { countShrimp, dataURLtoBlob } from "@/services/api";
 
 type CaptureStep = "camera" | "preview" | "analyzing" | "result";
 
@@ -82,22 +83,33 @@ export const CapturePage = () => {
   };
 
   const analyzeImage = async () => {
+    if (!capturedImage) return;
+    
     setStep("analyzing");
+    const startTime = performance.now();
     
     try {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Convert base64 image to blob for upload
+      const imageBlob = dataURLtoBlob(capturedImage);
+      
+      // Call FastAPI backend
+      const response = await countShrimp(imageBlob);
+      
+      const endTime = performance.now();
+      const processTime = (endTime - startTime) / 1000;
       
       setResult({
-        count: Math.floor(Math.random() * 5000) + 1000,
-        confidence: 95 + Math.random() * 4,
-        processTime: 1.2 + Math.random(),
-        imageUrl: capturedImage || "",
+        count: response.count,
+        confidence: response.confidence * 100, // Convert to percentage
+        processTime: processTime,
+        imageUrl: capturedImage,
       });
       setStep("result");
     } catch (error) {
+      console.error("Analysis error:", error);
       toast({
         title: "Analysis Failed",
-        description: "Unable to analyze image. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to connect to server. Please check if backend is running.",
         variant: "destructive",
       });
       setStep("preview");
