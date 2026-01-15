@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Zap, RotateCcw, Image as ImageIcon, Check, Focus } from "lucide-react";
+import { Camera, Zap, RotateCcw, Image as ImageIcon, Check, Focus, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { countShrimp, dataURLtoBlob } from "@/services/api";
+import { countShrimp, dataURLtoBlob, saveCapture } from "@/services/api";
+import { ImagePreviewModal } from "@/components/ImagePreviewModal";
 
 type CaptureStep = "camera" | "preview" | "analyzing" | "result";
 
@@ -26,6 +27,8 @@ export const CapturePage = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [result, setResult] = useState<DetectionResult | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const startCamera = useCallback(async () => {
     try {
@@ -123,12 +126,29 @@ export const CapturePage = () => {
     startCamera();
   };
 
-  const saveResult = () => {
-    toast({
-      title: "Saved!",
-      description: `Count of ${result?.count.toLocaleString()} saved successfully.`,
-    });
-    navigate("/history");
+  const saveResult = async () => {
+    if (!result || !capturedImage) return;
+    
+    setIsSaving(true);
+    try {
+      const imageBlob = dataURLtoBlob(capturedImage);
+      await saveCapture(imageBlob, result.count, result.confidence / 100);
+      
+      toast({
+        title: "Saved!",
+        description: `Count of ${result.count.toLocaleString()} saved successfully.`,
+      });
+      navigate("/history");
+    } catch (error) {
+      console.error("Save error:", error);
+      toast({
+        title: "Save Failed",
+        description: error instanceof Error ? error.message : "Unable to save capture.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -155,7 +175,10 @@ export const CapturePage = () => {
 
         {/* Camera Viewfinder - Main Focus */}
         <div className="flex-1 flex items-center justify-center px-5">
-          <div className="relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden bg-muted shadow-elevated border-4 border-card">
+          <div 
+            className={`relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden bg-muted shadow-elevated border-4 border-card ${step === "result" ? "cursor-pointer" : ""}`}
+            onClick={() => step === "result" && setShowPreview(true)}
+          >
             {/* Camera View */}
             {step === "camera" && (
               <>
@@ -216,8 +239,12 @@ export const CapturePage = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-black/70" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-white text-xs text-center font-medium">✓ Analyzed</p>
+                <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
+                  <p className="text-white text-xs font-medium">✓ Analyzed</p>
+                  <div className="flex items-center gap-1 text-white/80 text-xs">
+                    <ZoomIn className="h-3 w-3" />
+                    <span>Tap to view</span>
+                  </div>
                 </div>
               </>
             )}
@@ -244,14 +271,14 @@ export const CapturePage = () => {
         {/* Bottom Controls */}
         <div className="px-5 pb-6 pt-4">
           {step === "camera" && (
-            <div className="flex items-center justify-center gap-8">
+            <div className="flex items-center justify-center gap-6">
               {/* Gallery Button */}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
               >
-                <div className="w-12 h-12 rounded-xl bg-card shadow-soft flex items-center justify-center border border-border">
-                  <ImageIcon className="h-5 w-5" />
+                <div className="w-14 h-14 rounded-xl bg-card shadow-soft flex items-center justify-center border border-border">
+                  <ImageIcon className="h-6 w-6" />
                 </div>
                 <span className="text-xs">Gallery</span>
               </button>
@@ -268,9 +295,9 @@ export const CapturePage = () => {
                 </div>
               </button>
 
-              {/* Placeholder for symmetry */}
-              <div className="w-12 h-12 opacity-0">
-                <div className="w-12 h-12" />
+              {/* Placeholder for symmetry - now visible as guide */}
+              <div className="w-14 h-14 opacity-0">
+                <div className="w-14 h-14" />
               </div>
             </div>
           )}
@@ -337,9 +364,10 @@ export const CapturePage = () => {
                   size="lg"
                   className="flex-1 h-12 rounded-xl"
                   onClick={saveResult}
+                  disabled={isSaving}
                 >
                   <Check className="h-4 w-4 mr-2" />
-                  Save
+                  {isSaving ? "Saving..." : "Save"}
                 </Button>
               </div>
             </div>
@@ -356,6 +384,16 @@ export const CapturePage = () => {
           onChange={handleFileUpload}
         />
       </div>
+
+      {/* Image Preview Modal */}
+      {capturedImage && (
+        <ImagePreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          imageUrl={capturedImage}
+          count={result?.count}
+        />
+      )}
     </AppLayout>
   );
 };
