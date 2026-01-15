@@ -27,12 +27,11 @@ export const ProfilePage = () => {
     navigate("/");
   };
 
-  // Mock user details - replace with actual user data from API
   const userDetails = {
     name: user?.name || "John Doe",
     email: user?.email || "john@example.com",
-    phone: "+1 234 567 8900",
-    location: "Chennai, India",
+    phone: user?.phone || "Not provided",
+    location: user?.location || "Not provided",
     joinedDate: "January 2024",
   };
 

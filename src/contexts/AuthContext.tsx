@@ -4,6 +4,8 @@ interface User {
   id: string;
   email: string;
   name: string;
+  phone?: string;
+  location?: string;
   avatar?: string;
 }
 
@@ -11,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, phone?: string, location?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -62,7 +64,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const signup = async (email: string, password: string, name: string) => {
+  const signup = async (email: string, password: string, name: string, phone?: string, location?: string) => {
     setIsLoading(true);
     try {
       // Simulated signup - replace with actual API call
@@ -72,6 +74,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         id: "user_" + Date.now(),
         email,
         name,
+        phone,
+        location,
       };
       
       localStorage.setItem("prawnvision_user", JSON.stringify(userData));
