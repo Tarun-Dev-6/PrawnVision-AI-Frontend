@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, User, Waves } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Waves, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,8 @@ export const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login, signup } = useAuth();
@@ -30,7 +32,7 @@ export const AuthPage = () => {
           description: "You've successfully logged in.",
         });
       } else {
-        await signup(email, password, name);
+        await signup(email, password, name, phone, location);
         toast({
           title: "Account created!",
           description: "Welcome to PrawnVision AI.",
@@ -90,17 +92,39 @@ export const AuthPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <div className="relative animate-fade-in">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-12"
-                required={!isLogin}
-              />
-            </div>
+            <>
+              <div className="relative animate-fade-in">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="pl-12"
+                  required={!isLogin}
+                />
+              </div>
+              <div className="relative animate-fade-in">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="pl-12"
+                />
+              </div>
+              <div className="relative animate-fade-in">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Location (e.g., Chennai, India)"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="pl-12"
+                />
+              </div>
+            </>
           )}
 
           <div className="relative">
