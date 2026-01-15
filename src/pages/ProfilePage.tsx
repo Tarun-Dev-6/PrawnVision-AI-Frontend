@@ -6,7 +6,6 @@ import {
   Calendar,
   LogOut,
   Camera,
-  Building,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -33,7 +32,6 @@ export const ProfilePage = () => {
     name: user?.name || "John Doe",
     email: user?.email || "john@example.com",
     phone: "+1 234 567 8900",
-    company: "Aqua Farms Ltd.",
     location: "Chennai, India",
     joinedDate: "January 2024",
   };
@@ -55,7 +53,7 @@ export const ProfilePage = () => {
             {userDetails.name}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {userDetails.company}
+            Shrimp Seed Counter
           </p>
         </div>
 
@@ -85,17 +83,6 @@ export const ProfilePage = () => {
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">Phone</p>
                 <p className="font-medium text-foreground">{userDetails.phone}</p>
-              </div>
-            </div>
-
-            {/* Company */}
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                <Building className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Company</p>
-                <p className="font-medium text-foreground">{userDetails.company}</p>
               </div>
             </div>
 
