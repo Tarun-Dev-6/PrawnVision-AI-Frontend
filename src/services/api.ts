@@ -1,10 +1,17 @@
-// API Configuration - Change this to your backend URL
-export const API_BASE_URL = "http://localhost:8000";
+// src/services/api.ts
 
-export interface CountResponse {
-  count: number;
-  confidence: number;
-}
+// ===============================
+// CONFIG
+// ===============================
+
+// 🔴 Change this ONLY when ngrok restarts
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://superelementary-inorganic-ninfa.ngrok-free.dev";
+
+// ===============================
+// TYPES
+// ===============================
 
 export interface CaptureRecord {
   id: number;
@@ -14,104 +21,94 @@ export interface CaptureRecord {
   captured_at: string;
 }
 
-/**
- * Send image to FastAPI backend for shrimp counting
- */
-export async function countShrimp(imageFile: File | Blob): Promise<CountResponse> {
-  const formData = new FormData();
-  formData.append("file", imageFile);
+export interface CountResponse {
+  count: number;
+  confidence: number;
+}
 
-  const response = await fetch(`${API_BASE_URL}/count`, {
+// ===============================
+// INTERNAL FETCH HELPER
+// ===============================
+
+async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, options);
+
+  const contentType = res.headers.get("content-type");
+
+  // ❌ HTTP error
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
+  }
+
+  // ❌ Not JSON (ngrok warning / HTML page)
+  if (!contentType || !contentType.includes("application/json")) {
+    const text = await res.text();
+    console.error("Non-JSON response:", text);
+    throw new Error("Expected JSON but received HTML");
+  }
+
+  return res.json();
+}
+
+// ===============================
+// API CALLS
+// ===============================
+
+// ---------- COUNT ----------
+export async function countShrimp(image: Blob): Promise<CountResponse> {
+  const formData = new FormData();
+  formData.append("file", image);
+
+  return safeFetch(`${API_BASE_URL}/count`, {
     method: "POST",
     body: formData,
   });
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
-/**
- * Save a capture to the database
- */
+// ---------- SAVE ----------
 export async function saveCapture(
-  imageBlob: Blob,
+  image: Blob,
   count: number,
   confidence: number
 ): Promise<CaptureRecord> {
   const formData = new FormData();
-  formData.append("file", imageBlob, "capture.jpg");
-  formData.append("count", count.toString());
-  formData.append("confidence", confidence.toString());
+  formData.append("file", image);
+  formData.append("count", String(count));
+  formData.append("confidence", String(confidence));
 
-  const response = await fetch(`${API_BASE_URL}/captures`, {
+  return safeFetch(`${API_BASE_URL}/captures`, {
     method: "POST",
     body: formData,
   });
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
-/**
- * Get all captures from the database
- */
+// ---------- HISTORY ----------
 export async function getCaptures(): Promise<CaptureRecord[]> {
-  const response = await fetch(`${API_BASE_URL}/captures`);
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
+  return safeFetch(`${API_BASE_URL}/captures`);
 }
 
-/**
- * Get the most recent capture
- */
-export async function getLatestCapture(): Promise<CaptureRecord | null> {
-  const response = await fetch(`${API_BASE_URL}/captures/latest`);
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-/**
- * Delete a capture by ID
- */
+// ---------- DELETE ----------
 export async function deleteCapture(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/captures/${id}`, {
+  await safeFetch(`${API_BASE_URL}/captures/${id}`, {
     method: "DELETE",
   });
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
 }
 
-/**
- * Convert base64 data URL to Blob for upload
- */
+// ===============================
+// UTIL: base64 → Blob
+// ===============================
+
 export function dataURLtoBlob(dataURL: string): Blob {
   const arr = dataURL.split(",");
   const mime = arr[0].match(/:(.*?);/)?.[1] || "image/jpeg";
   const bstr = atob(arr[1]);
   let n = bstr.length;
   const u8arr = new Uint8Array(n);
+
   while (n--) {
     u8arr[n] = bstr.charCodeAt(n);
   }
+
   return new Blob([u8arr], { type: mime });
 }

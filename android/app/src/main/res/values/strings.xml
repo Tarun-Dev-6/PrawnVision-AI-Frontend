@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PrawnVisionAI</string>
+    <string name="title_activity_main">PrawnVisionAI</string>
+    <string name="package_name">com.prawnvision.ai</string>
+    <string name="custom_url_scheme">com.prawnvision.ai</string>
+</resources>

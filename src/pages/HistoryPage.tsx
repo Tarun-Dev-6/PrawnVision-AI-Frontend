@@ -24,6 +24,24 @@ export const HistoryPage = () => {
   const [previewImage, setPreviewImage] = useState<{ url: string; count: number } | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  const formatDate = (dateString: string) => {
+  // Fix backend timestamp: "YYYY-MM-DD HH:mm:ss"
+  const safeDate = dateString.replace(" ", "T");
+  const date = new Date(safeDate);
+
+  if (isNaN(date.getTime())) {
+    return "Unknown time";
+  }
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
   const fetchCaptures = async () => {
     try {
       setLoading(true);
@@ -63,19 +81,7 @@ export const HistoryPage = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const getImageUrl = (imageUrl: string) => {
-    // If it's a relative path, prepend the API base URL
     if (imageUrl.startsWith("/")) {
       return `${API_BASE_URL}${imageUrl}`;
     }
@@ -85,14 +91,15 @@ export const HistoryPage = () => {
   return (
     <AppLayout>
       <div className="px-5 pt-6">
-        {/* Loading State */}
+
+        {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error */}
         {error && !loading && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-destructive/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -108,7 +115,7 @@ export const HistoryPage = () => {
           </div>
         )}
 
-        {/* Capture List */}
+        {/* History List */}
         {!loading && !error && (
           <div className="space-y-4">
             {captures.length > 0 ? (
@@ -142,64 +149,56 @@ export const HistoryPage = () => {
                   <div className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="h-4 w-4" />
-                      <span className="text-sm">{formatDate(capture.captured_at)}</span>
+                      <span className="text-sm">
+                        {formatDate(capture.captured_at)}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-lg font-bold text-foreground">
-                        {capture.count.toLocaleString()}
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button
-                            className="w-8 h-8 rounded-lg bg-destructive/10 hover:bg-destructive/20 flex items-center justify-center transition-colors"
-                            disabled={deletingId === capture.id}
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="w-8 h-8 rounded-lg bg-destructive/10 hover:bg-destructive/20 flex items-center justify-center"
+                          disabled={deletingId === capture.id}
+                        >
+                          {deletingId === capture.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          )}
+                        </button>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Capture?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(capture.id)}
+                            className="bg-destructive"
                           >
-                            {deletingId === capture.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-destructive" />
-                            ) : (
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            )}
-                          </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Capture?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete
-                              this capture from your history.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(capture.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground">No captures yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">
-                  Start capturing to see your history
-                </p>
+                <ImageIcon className="mx-auto h-8 w-8 text-muted-foreground" />
+                <p className="text-muted-foreground mt-2">No captures yet</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Image Preview Modal */}
       {previewImage && (
         <ImagePreviewModal
           isOpen={!!previewImage}
@@ -213,3 +212,5 @@ export const HistoryPage = () => {
 };
 
 export default HistoryPage;
+
+
