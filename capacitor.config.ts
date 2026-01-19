@@ -1,19 +1,18 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.prawnvision.ai',
-  appName: 'PrawnVisionAI',
+  appId: 'com.prawnsight.ai',
+  appName: 'PrawnSight AI',
   webDir: 'dist',
   bundledWebRuntime: false,
 
   server: {
     cleartext: true,
     allowNavigation: [
-      '192.168.0.109',
-      'http://192.168.0.109:8000',
-      '192.168.0.109:8000'
-    ]
-  }
+      'superelementary-inorganic-ninfa.ngrok-free.dev',
+      '*.ngrok-free.dev',
+    ],
+  },
 };
 
 export default config;

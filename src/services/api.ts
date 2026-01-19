@@ -30,26 +30,31 @@ export interface CountResponse {
 // INTERNAL FETCH HELPER
 // ===============================
 
-async function safeFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+async function safeFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      "ngrok-skip-browser-warning": "true",
+    },
+  });
 
-  const contentType = res.headers.get("content-type");
+  const contentType = res.headers.get("content-type") || "";
 
-  // ❌ HTTP error
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
   }
 
-  // ❌ Not JSON (ngrok warning / HTML page)
-  if (!contentType || !contentType.includes("application/json")) {
+  if (!contentType.includes("application/json")) {
     const text = await res.text();
     console.error("Non-JSON response:", text);
-    throw new Error("Expected JSON but received HTML");
+    throw new Error("Expected JSON but received HTML (ngrok interstitial)");
   }
 
   return res.json();
 }
+
 
 // ===============================
 // API CALLS
