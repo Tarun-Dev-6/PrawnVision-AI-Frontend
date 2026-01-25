@@ -4,13 +4,12 @@ const config: CapacitorConfig = {
   appId: 'com.prawnsight.ai',
   appName: 'PrawnSight AI',
   webDir: 'dist',
-  bundledWebRuntime: false,
 
   server: {
-    cleartext: true,
+    androidScheme: 'https',
     allowNavigation: [
-      'superelementary-inorganic-ninfa.ngrok-free.dev',
-      '*.ngrok-free.dev',
+      'https://superelementary-inorganic-ninfa.ngrok-free.dev',
+      'https://*.ngrok-free.dev',
     ],
   },
 };

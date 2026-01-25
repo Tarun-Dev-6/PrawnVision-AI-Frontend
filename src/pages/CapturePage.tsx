@@ -1,11 +1,24 @@
+
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, Zap, RotateCcw, Image as ImageIcon, Check, Focus, ZoomIn } from "lucide-react";
+import {
+  Camera,
+  Zap,
+  RotateCcw,
+  Image as ImageIcon,
+  Check,
+  Focus,
+  ZoomIn,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { countShrimp, dataURLtoBlob, saveCapture } from "@/services/api";
+import { countShrimp, dataURLtoBlob } from "@/services/api";
 import { ImagePreviewModal } from "@/components/ImagePreviewModal";
+
+// ✅ LOCAL STORAGE
+import { saveImageLocally } from "@/services/storage";
+import { addLocalCapture } from "@/services/localCaptures";
 
 type CaptureStep = "camera" | "preview" | "analyzing" | "result";
 
@@ -13,12 +26,12 @@ interface DetectionResult {
   count: number;
   confidence: number;
   processTime: number;
-  imageUrl: string;
 }
 
 export const CapturePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +43,9 @@ export const CapturePage = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // =============================
+  // CAMERA
+  // =============================
   const startCamera = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -39,83 +55,127 @@ export const CapturePage = () => {
         videoRef.current.srcObject = mediaStream;
       }
       setStream(mediaStream);
-    } catch (error) {
+    } catch {
       toast({
         title: "Camera Error",
-        description: "Unable to access camera. Please grant permission.",
+        description: "Unable to access camera.",
         variant: "destructive",
       });
     }
   }, [toast]);
 
   const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
-    }
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
   }, [stream]);
 
-  const captureImage = useCallback(() => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL("image/jpeg", 0.9);
-        setCapturedImage(imageData);
-        setStep("preview");
-        stopCamera();
-      }
-    }
-  }, [stopCamera]);
+  // =============================
+  // CAPTURE
+  // =============================
+const captureImage = () => {
+  if (!videoRef.current || !canvasRef.current) return;
+
+  const video = videoRef.current;
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const size = Math.min(video.videoWidth, video.videoHeight);
+
+  const sx = (video.videoWidth - size) / 2;
+  const sy = (video.videoHeight - size) / 2;
+
+  canvas.width = size;
+  canvas.height = size;
+
+  ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+
+  setCapturedImage(canvas.toDataURL("image/jpeg", 0.9));
+  setStep("preview");
+  stopCamera();
+};
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setCapturedImage(reader.result as string);
-        setStep("preview");
-        stopCamera();
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCapturedImage(reader.result as string);
+      setStep("preview");
+      stopCamera();
+    };
+    reader.readAsDataURL(file);
   };
 
+  // =============================
+  // ANALYZE
+  // =============================
   const analyzeImage = async () => {
     if (!capturedImage) return;
-    
+
     setStep("analyzing");
-    const startTime = performance.now();
-    
+    const start = performance.now();
+
     try {
-      // Convert base64 image to blob for upload
-      const imageBlob = dataURLtoBlob(capturedImage);
-      
-      // Call FastAPI backend
-      const response = await countShrimp(imageBlob);
-      
-      const endTime = performance.now();
-      const processTime = (endTime - startTime) / 1000;
-      
+      const blob = dataURLtoBlob(capturedImage);
+      const res = await countShrimp(blob);
+
       setResult({
-        count: response.count,
-        confidence: response.confidence * 100, // Convert to percentage
-        processTime: processTime,
-        imageUrl: capturedImage,
+        count: res.count,
+        confidence: res.confidence * 100,
+        processTime: (performance.now() - start) / 1000,
       });
+
       setStep("result");
-    } catch (error) {
-      console.error("Analysis error:", error);
+    } catch {
       toast({
         title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Unable to connect to server. Please check if backend is running.",
+        description: "Backend not reachable",
         variant: "destructive",
       });
       setStep("preview");
+    }
+  };
+
+  // =============================
+  // SAVE LOCALLY (🔥 MOST IMPORTANT)
+  // =============================
+  const saveResult = async () => {
+    if (!result || !capturedImage) return;
+
+    setIsSaving(true);
+
+    try {
+      const blob = dataURLtoBlob(capturedImage);
+      const filename = `capture_${Date.now()}.jpg`;
+
+      // 1️⃣ SAVE IMAGE FILE
+      await saveImageLocally(blob, filename);
+
+      // 2️⃣ SAVE METADATA
+      addLocalCapture({
+        id: Date.now(),
+        imagePath: filename,
+        count: result.count,
+        capturedAt: new Date().toISOString(),
+      });
+
+      toast({
+        title: "Saved",
+        description: "Image saved locally on device",
+      });
+
+      navigate("/history");
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Save Failed",
+        description: "Could not save image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -126,59 +186,39 @@ export const CapturePage = () => {
     startCamera();
   };
 
-  const saveResult = async () => {
-    if (!result || !capturedImage) return;
-    
-    setIsSaving(true);
-    try {
-      const imageBlob = dataURLtoBlob(capturedImage);
-      await saveCapture(imageBlob, result.count, result.confidence / 100);
-      
-      toast({
-        title: "Saved!",
-        description: `Count of ${result.count.toLocaleString()} saved successfully.`,
-      });
-      navigate("/history");
-    } catch (error) {
-      console.error("Save error:", error);
-      toast({
-        title: "Save Failed",
-        description: error instanceof Error ? error.message : "Unable to save capture.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   useEffect(() => {
     startCamera();
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
+    return stopCamera;
   }, []);
 
+  // =============================
+  // UI (UNCHANGED)
+  // =============================
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-140px)]">
-        {/* Instructions */}
-        <div className="px-5 py-4 text-center">
-          <p className="text-muted-foreground text-sm">
+<div className="flex flex-col h-[calc(100vh-140px)]">
+         {/* Instructions */}
+         <div className="px-5 py-4 text-center">
+           <p className="text-muted-foreground text-sm">
             {step === "camera" && "Position shrimp seeds in frame and capture"}
-            {step === "preview" && "Review your image before analysis"}
-            {step === "analyzing" && "Please wait while AI processes..."}
-            {step === "result" && "Analysis complete!"}
+             {step === "preview" && "Review your image before analysis"}
+             {step === "analyzing" && "Please wait while AI processes..."}
+             {step === "result" && "Analysis complete!"}
           </p>
-        </div>
+         </div>
 
-        {/* Camera Viewfinder - Main Focus */}
+         {/* Camera Viewfinder - Main Focus */}
         <div className="flex-1 flex items-center justify-center px-5">
-          <div 
-            className={`relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden bg-muted shadow-elevated border-4 border-card ${step === "result" ? "cursor-pointer" : ""}`}
-            onClick={() => step === "result" && setShowPreview(true)}
-          >
+           <div 
+  className={`relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden bg-muted shadow-elevated border-4 border-card ${
+    step === "preview" || step === "result" ? "cursor-pointer" : ""
+  }`}
+  onClick={() => {
+    if (step === "preview" || step === "result") {
+      setShowPreview(true);
+    }
+  }}
+>
             {/* Camera View */}
             {step === "camera" && (
               <>
@@ -226,6 +266,8 @@ export const CapturePage = () => {
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                     <p className="text-white text-xs text-center font-medium">Preview</p>
                   </div>
+                  
+                  
                 )}
               </>
             )}
@@ -269,9 +311,9 @@ export const CapturePage = () => {
         </div>
 
         {/* Bottom Controls */}
-        <div className="px-5 pb-6 pt-4">
+        <div className="px-5 pb-16 pt-2">
           {step === "camera" && (
-            <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center justify-center gap-6 mt-6">
               {/* Gallery Button */}
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -336,11 +378,11 @@ export const CapturePage = () => {
                   </p>
                 </div>
                 <div className="flex justify-center gap-6 text-sm">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <p className="text-muted-foreground text-xs">Confidence</p>
                     <p className="font-semibold text-foreground">{result.confidence.toFixed(1)}%</p>
-                  </div>
-                  <div className="w-px bg-border" />
+                  </div> */}
+                  {/* <div className="w-px bg-border" /> */}
                   <div className="text-center">
                     <p className="text-muted-foreground text-xs">Time</p>
                     <p className="font-semibold text-foreground">{result.processTime.toFixed(1)}s</p>
@@ -399,3 +441,4 @@ export const CapturePage = () => {
 };
 
 export default CapturePage;
+

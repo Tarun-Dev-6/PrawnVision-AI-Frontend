@@ -30,9 +30,9 @@ export const ProfilePage = () => {
   const userDetails = {
     name: user?.name || "John Doe",
     email: user?.email || "john@example.com",
-    phone: user?.phone || "Not provided",
-    location: user?.location || "Not provided",
-    joinedDate: "January 2024",
+    phone: user?.phone || "1234567890",
+    location: user?.location || "Bhimavaram, India",
+    joinedDate: "January 2026",
   };
 
   return (
