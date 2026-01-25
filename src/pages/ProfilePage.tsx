@@ -27,13 +27,13 @@ export const ProfilePage = () => {
     navigate("/");
   };
 
-  const userDetails = {
-    name: user?.name || "John Doe",
-    email: user?.email || "john@example.com",
-    phone: user?.phone || "1234567890",
-    location: user?.location || "Bhimavaram, India",
-    joinedDate: "January 2026",
-  };
+const userDetails = {
+  name: user?.name,
+  email: user?.email,
+  phone: user?.phone,
+  location: user?.location,
+  joinedDate: "January 2026",
+};
 
   return (
     <AppLayout>

@@ -42,7 +42,7 @@ export const AuthPage = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: "Invalid Email or Password. Please try again.",
         variant: "destructive",
       });
     } finally {

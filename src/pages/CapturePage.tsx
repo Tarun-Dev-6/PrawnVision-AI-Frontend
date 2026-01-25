@@ -19,6 +19,8 @@ import { ImagePreviewModal } from "@/components/ImagePreviewModal";
 // ✅ LOCAL STORAGE
 import { saveImageLocally } from "@/services/storage";
 import { addLocalCapture } from "@/services/localCaptures";
+import { addUserLocalCapture } from "@/services/localCaptures";
+import { useAuth } from "@/contexts/AuthContext";
 
 type CaptureStep = "camera" | "preview" | "analyzing" | "result";
 
@@ -31,7 +33,7 @@ interface DetectionResult {
 export const CapturePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -142,42 +144,45 @@ const captureImage = () => {
   // SAVE LOCALLY (🔥 MOST IMPORTANT)
   // =============================
   const saveResult = async () => {
-    if (!result || !capturedImage) return;
+    
+  if (!result || !capturedImage || !user) return;
 
-    setIsSaving(true);
+  setIsSaving(true);
 
-    try {
-      const blob = dataURLtoBlob(capturedImage);
-      const filename = `capture_${Date.now()}.jpg`;
+  try {
+    const blob = dataURLtoBlob(capturedImage);
+    const filename = `capture_${Date.now()}.jpg`;
 
-      // 1️⃣ SAVE IMAGE FILE
-      await saveImageLocally(blob, filename);
+    // 1️⃣ Save image file locally
+    await saveImageLocally(blob, filename);
 
-      // 2️⃣ SAVE METADATA
-      addLocalCapture({
-        id: Date.now(),
-        imagePath: filename,
-        count: result.count,
-        capturedAt: new Date().toISOString(),
-      });
+    // 2️⃣ Save metadata USER-WISE
+    addUserLocalCapture(user.id, {
+      id: Date.now(),
+      imagePath: filename,
+      count: result.count,
+      confidence: result.confidence,
+      capturedAt: new Date().toISOString(),
+    });
 
-      toast({
-        title: "Saved",
-        description: "Image saved locally on device",
-      });
+    toast({
+      title: "Saved",
+      description: "Image saved to your local history",
+    });
 
-      navigate("/history");
-    } catch (e) {
-      console.error(e);
-      toast({
-        title: "Save Failed",
-        description: "Could not save image",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    navigate("/history");
+  } catch (e) {
+    console.error(e);
+    toast({
+      title: "Save Failed",
+      description: "Could not save image",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSaving(false);
+  }
+};
+
 
   const resetCapture = () => {
     setCapturedImage(null);
