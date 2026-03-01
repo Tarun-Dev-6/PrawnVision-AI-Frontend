@@ -7,7 +7,7 @@
 // 🔴 Change this ONLY when ngrok restarts
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://superelementary-inorganic-ninfa.ngrok-free.dev";
+  "https://tarun666-prawnvision-yolo-api.hf.space/count";
 
 // ===============================
 // TYPES
@@ -61,15 +61,28 @@ async function safeFetch<T>(url: string, options: RequestInit = {}): Promise<T> 
 // ===============================
 
 // ---------- COUNT ----------
-export async function countShrimp(image: Blob): Promise<CountResponse> {
+export async function countShrimp(imageBlob: Blob) {
   const formData = new FormData();
-  formData.append("file", image);
+  formData.append("file", imageBlob); // 🔥 MUST be "file"
 
-  return safeFetch(`${API_BASE_URL}/count`, {
-    method: "POST",
-    body: formData,
-  });
+  const response = await fetch(
+    "https://tarun666-prawnvision-yolo-api.hf.space/count",
+    {
+      method: "POST",
+      body: formData,
+      // ❌ DO NOT set Content-Type manually
+    }
+  );
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error("Backend error:", errText);
+    throw new Error("API error");
+  }
+
+  return await response.json();
 }
+
 
 // ---------- SAVE ----------
 export async function saveCapture(
