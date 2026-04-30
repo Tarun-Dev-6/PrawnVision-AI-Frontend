@@ -56,7 +56,7 @@ Install the app on your Android device to use live detection.
 - Enter your email and password
 - If new user, switch to signup and create account
 <p align="center">
-<img src="./screenshots/login-page.jpeg" width="300" margin="10" />
+<img src="./screenshots/login-page.jpeg" width="300" margin="20" />
 </p>
 
 <p align="center">
@@ -67,57 +67,68 @@ Install the app on your Android device to use live detection.
 - After login, go to capture screen
 - Allow camera permission
 
-
+<p align="center">
+<img src="./screenshots/home-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 3️⃣ Capture Image
 - Position shrimp seeds inside frame
 - Tap capture button
 
-
+<p align="center">
+<img src="./screenshots/upload-image-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 4️⃣ Analyze Image
 - Click "Analyze"
 - AI will process the image
 
-
+<p align="center">
+<img src="./screenshots/analyzing-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 5️⃣ View Result
 - App shows shrimp count
 - Confidence and processing time displayed
 
-
+<p align="center">
+<img src="./screenshots/result-page.jpeg" width="300" margin="10"/>
+</p>
 
 
 ### 6️⃣ Live Detection (Optional)
 - Tap "Live"
 - Real-time shrimp counting will start
 
-
----
+<p align="center">
+<img src="./screenshots/live-detection-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 7️⃣ Save to History
 - Click "Save"
 - Image and count stored locally
 
-![Save](./screenshots/save.png)
-
----
 
 ### 8️⃣ View History
 - Navigate to history page
 - View previous detections
 
+<p align="center">
+<img src="./screenshots/history-page.jpeg" width="300" margin="10"/>
+</p>
+
+### 8️⃣ Profile Page
+- View the details of user
+- logout option
 
 
-
+<p align="center">
+<img src="./screenshots/profile-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 🔁 App Flow
 
 Login → Capture Image → AI Detection → View Results → Save History
-
-
-
-
 
 
 
