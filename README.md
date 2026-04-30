@@ -55,8 +55,13 @@ Install the app on your Android device to use live detection.
 - Open the app
 - Enter your email and password
 - If new user, switch to signup and create account
-<img src="./screenshots/login-page.jpeg" width="300"/>
+<p align="center">
+<img src="./screenshots/login-page.jpeg" width="300" margin="10" />
+</p>
 
+<p align="center">
+<img src="./screenshots/signup-page.jpeg" width="300" margin="10"/>
+</p>
 
 ### 2️⃣ Open Camera
 - After login, go to capture screen
