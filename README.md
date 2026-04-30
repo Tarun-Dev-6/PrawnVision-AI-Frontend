@@ -138,5 +138,6 @@ Login → Capture Image → AI Detection → View Results → Save History
 - Model retraining pipeline
 - Admin dashboard
 - JWT-based authentication
+- Batch Processing
 
 
