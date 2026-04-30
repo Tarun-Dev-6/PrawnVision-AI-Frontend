@@ -55,7 +55,7 @@ Install the app on your Android device to use live detection.
 - Open the app
 - Enter your email and password
 - If new user, switch to signup and create account
-
+![Login](./screenshots/login-page.jpeg)
 
 
 ### 2️⃣ Open Camera
