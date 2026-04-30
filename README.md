@@ -84,7 +84,7 @@ Install the app on your Android device to use live detection.
 - AI will process the image
 
 <p align="center">
-<img src="./screenshots/analyzing-page.jpeg" width="300" margin="10"/>
+<img src="./screenshots/analyzing.jpeg" width="300" margin="10"/>
 </p>
 
 ### 5️⃣ View Result
@@ -92,7 +92,7 @@ Install the app on your Android device to use live detection.
 - Confidence and processing time displayed
 
 <p align="center">
-<img src="./screenshots/result-page.jpeg" width="300" margin="10"/>
+<img src="./screenshots/results-page.jpeg" width="300" margin="10"/>
 </p>
 
 
@@ -101,7 +101,7 @@ Install the app on your Android device to use live detection.
 - Real-time shrimp counting will start
 
 <p align="center">
-<img src="./screenshots/live-detection-page.jpeg" width="300" margin="10"/>
+<img src="./screenshots/live-detection.jpeg" width="300" margin="10"/>
 </p>
 
 ### 7️⃣ Save to History
