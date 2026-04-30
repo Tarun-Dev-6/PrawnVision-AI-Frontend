@@ -42,7 +42,7 @@ https://tarun666-prawnvision-yolo-api.hf.space
 
 ### 📱 Download APK
 
-👉 [Download Latest APK](https://github.com/YOUR_USERNAME/YOUR_REPO/releases)
+👉 [Download APK](https://github.com/Tarun-Dev-6/prawnsight-ai/releases)
 
 Install the app on your Android device to use live detection.
 
