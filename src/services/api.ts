@@ -7,7 +7,7 @@
 // 🔴 Change this ONLY when ngrok restarts
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://tarun666-prawnvision-yolo-api.hf.space/count";
+  "https://tarun666-prawnvision-yolo-api.hf.space";
 
 // ===============================
 // TYPES

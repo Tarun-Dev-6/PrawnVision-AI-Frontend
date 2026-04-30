@@ -22,7 +22,7 @@ import { addLocalCapture } from "@/services/localCaptures";
 import { addUserLocalCapture } from "@/services/localCaptures";
 import { useAuth } from "@/contexts/AuthContext";
 
-type CaptureStep = "camera" | "preview" | "analyzing" | "result";
+type CaptureStep = "camera" | "preview" | "analyzing" | "result" | "live";
 
 interface DetectionResult {
   count: number;
@@ -37,6 +37,7 @@ export const CapturePage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const liveIntervalRef = useRef<any>(null);
 
   const [step, setStep] = useState<CaptureStep>("camera");
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -183,6 +184,57 @@ const captureImage = () => {
   }
 };
 
+//live detection function
+const startLiveDetection = () => {
+  // ✅ Prevent multiple intervals
+  if (liveIntervalRef.current) {
+    clearInterval(liveIntervalRef.current);
+  }
+
+  setStep("live");
+
+  liveIntervalRef.current = setInterval(async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // ✅ PERFORMANCE FIX (important)
+    canvas.width = 640;
+    canvas.height = 640;
+
+    ctx.drawImage(video, 0, 0, 640, 640);
+
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+    const blob = dataURLtoBlob(dataUrl);
+
+    try {
+      const res = await countShrimp(blob);
+
+      setResult({
+        count: res.count,
+        confidence: res.confidence * 100,
+        processTime: 0,
+      });
+    } catch (e) {
+      console.error("Live detection error", e);
+    }
+  }, 1000);
+};
+
+
+//stop function for live detection
+const stopLiveDetection = () => {
+  if (liveIntervalRef.current) {
+    clearInterval(liveIntervalRef.current);
+    liveIntervalRef.current = null;
+  }
+
+  setResult(null); // optional but clean
+  setStep("camera");
+};
 
   const resetCapture = () => {
     setCapturedImage(null);
@@ -191,11 +243,18 @@ const captureImage = () => {
     startCamera();
   };
 
-  useEffect(() => {
-    startCamera();
-    return stopCamera;
-  }, []);
+useEffect(() => {
+  startCamera();
 
+  return () => {
+    stopCamera();
+
+    if (liveIntervalRef.current) {
+      clearInterval(liveIntervalRef.current);
+    }
+  };
+}, []);
+<div className="px-5 pb-16 pt-2"></div>
   // =============================
   // UI (UNCHANGED)
   // =============================
@@ -211,7 +270,11 @@ const captureImage = () => {
              {step === "result" && "Analysis complete!"}
           </p>
          </div>
-
+        <div>
+          <p className='text-muted text -centerd align in middle foregroung align items-center justif'>
+            
+          </p>
+        </div>
          {/* Camera Viewfinder - Main Focus */}
         <div className="flex-1 flex items-center justify-center px-5">
            <div 
@@ -224,16 +287,26 @@ const captureImage = () => {
     }
   }}
 >
+  <div> <p className='text muted align items in line inorder align in center '> </p></div>
             {/* Camera View */}
-            {step === "camera" && (
-              <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+            {(step === "camera" || step === "live") && (
+  <>
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      muted
+      className="absolute inset-0 w-full h-full object-cover"
+    />
+
+    {step === "live" && result && (
+      <div className="absolute top-4 left-4 bg-black/60 text-white px-4 py-2 rounded-xl z-10">
+        Count: {result.count}
+      </div>
+      
+    )}
+
+  
                 
                 {/* Corner Brackets */}
                 <div className="absolute inset-0 pointer-events-none p-4">
@@ -256,7 +329,9 @@ const captureImage = () => {
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                   <p className="text-white text-xs text-center font-medium">Live Camera</p>
                 </div>
+
               </>
+              
             )}
 
             {/* Preview View */}
@@ -319,6 +394,7 @@ const captureImage = () => {
         <div className="px-5 pb-16 pt-2">
           {step === "camera" && (
               <div className="flex items-center justify-center gap-6 mt-6">
+                
               {/* Gallery Button */}
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -343,11 +419,27 @@ const captureImage = () => {
               </button>
 
               {/* Placeholder for symmetry - now visible as guide */}
-              <div className="w-14 h-14 opacity-0">
-                <div className="w-14 h-14" />
-              </div>
+ <button
+  onClick={startLiveDetection}
+  className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground"
+>
+  <div className="w-14 h-14 rounded-xl bg-card shadow-soft flex items-center justify-center border">
+    <Zap className="h-6 w-6" />
+  </div>
+  <span className="text-xs">Live</span>
+</button>
             </div>
           )}
+          {step === "live" && (
+  <div className="flex items-center justify-center mt-6">
+    <button
+      onClick={stopLiveDetection}
+      className="w-20 h-20 rounded-full bg-red-500 shadow-elevated flex items-center justify-center text-white font-semibold"
+    >
+      Stop
+    </button>
+  </div>
+)}
 
           {step === "preview" && (
             <div className="flex gap-4 max-w-sm mx-auto animate-fade-in">
@@ -420,6 +512,7 @@ const captureImage = () => {
             </div>
           )}
         </div>
+        
 
         {/* Hidden elements */}
         <canvas ref={canvasRef} className="hidden" />

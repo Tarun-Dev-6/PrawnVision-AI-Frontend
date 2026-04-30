@@ -96,7 +96,7 @@
 //     </AuthContext.Provider>
 //   );
 // };
-
+const API_BASE = "https://tarun666-prawnvision-yolo-api.hf.space";
 
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
@@ -138,11 +138,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   }, []);
 
+
   // --------------------
   // LOGIN
   // --------------------
   const login = async (email: string, password: string) => {
-    const res = await axios.post("https://superelementary-inorganic-ninfa.ngrok-free.dev/auth/login", {
+    const res = await axios.post(`${API_BASE}/auth/login`, {
       email,
       password,
     });
@@ -169,7 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     phone?: string,
     location?: string
   ) => {
-    const res = await axios.post("https://superelementary-inorganic-ninfa.ngrok-free.dev/auth/signup", {
+    const res = await axios.post(`${API_BASE}/auth/signup`, {
       email,
       password,
       name,
@@ -207,3 +208,5 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
+
